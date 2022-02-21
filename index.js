@@ -1,11 +1,13 @@
-
 var aws = require('aws-sdk');
 var cwl = new aws.CloudWatchLogs();
 
 var ses = new aws.SES();
 
 exports.handler = function(event, context) {
+    //context.callbackWaitsForEmptyEventLoop = false
+    console.log(event);
     var message = JSON.parse(event.Records[0].Sns.Message);
+    //console.log(message);
     var alarmName = message.AlarmName;
     var oldState = message.OldStateValue;
     var newState = message.NewStateValue;
@@ -57,21 +59,21 @@ function generateEmailContent(data, message) {
     var style = '<style> pre {color: red;} </style>';
     var logData = '<br/>Logs:<br/>' + style;
     for (var i in events) {
-        logData += '<pre>Instance:' + JSON.stringify(events[i]['logStreamName'])  + '</pre>';
+        //logData += '<pre>Instance:' + JSON.stringify(events[i]['logStreamName'])  + '</pre>';
         logData += '<pre>Message:' + JSON.stringify(events[i]['message']) + '</pre><br/>';
     }
     
     var date = new Date(message.StateChangeTime);
     var text = 'Alarm Name: ' + '<b>' + message.AlarmName + '</b><br/>' + 
-               'Runbook Details: <a href="http://wiki.mycompany.com/prodrunbook">Production Runbook</a><br/>' +
-               'Account ID: ' + message.AWSAccountId + '<br/>'+
+               //'Runbook Details: <a href="http://wiki.mycompany.com/prodrunbook">Production Runbook</a><br/>' +
+               //'Account ID: ' + message.AWSAccountId + '<br/>'+
                'Region: ' + message.Region + '<br/>'+
                'Alarm Time: ' + date.toString() + '<br/>'+
                logData;
-    var subject = 'Details for Alarm - ' + message.AlarmName;
+    var subject = 'Alarm - ' + message.AlarmName;
     var emailContent = {
         Destination: {
-            ToAddresses: ["Add destination email here"]
+            ToAddresses: ["devops@applaudhr.com", "prodops@applaudhr.com", "karthikeyan.mohan@applaudhr.com", "kushal.bhattacharyya@applaudhr.com"]
         },
         Message: {
             Body: {
@@ -83,7 +85,7 @@ function generateEmailContent(data, message) {
                 Data: subject
             }
         },
-        Source: 'Add source email here'
+        Source: 'sateesh.chava@applaudhr.com'
     };
     
     return emailContent;
